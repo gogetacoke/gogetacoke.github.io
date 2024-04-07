@@ -1,0 +1,737 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="gogetacoke">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="主从DNS搭建">
+<meta property="og:type" content="article">
+<meta property="og:title" content="2-DNS主从搭建">
+<meta property="og:url" content="http://example.com/2024/04/06/2-DNS%E4%B8%BB%E4%BB%8E%E6%90%AD%E5%BB%BA/index.html">
+<meta property="og:site_name" content="可乐哇">
+<meta property="og:description" content="主从DNS搭建">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-04-06T14:40:03.000Z">
+<meta property="article:modified_time" content="2024-04-06T18:01:18.234Z">
+<meta property="article:author" content="gogetacoke">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>2-DNS主从搭建 - 可乐哇</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>GoGetACoke</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="2-DNS主从搭建"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-04-06 22:40" pubdate>
+          2024年4月6日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.7k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          14 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">2-DNS主从搭建</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1>主从DNS搭建</h1>
+<span id="more"></span>
+<h2 id="概述">概述</h2>
+<blockquote>
+<p>主域名服务器</p>
+<ul>
+<li>特定DNS区域的官方服务器，具有唯一性</li>
+<li>负责维护该区域内所有的“域名&lt;--&gt;IP地址”记录</li>
+</ul>
+<p>从域名服务器</p>
+<ul>
+<li>也称为辅助域名服务器，可以没有</li>
+<li>其维护的“域名&lt;--&gt;IP地址”记录取决于主域名服务器</li>
+</ul>
+</blockquote>
+<h2 id="服务搭建">服务搭建</h2>
+<h3 id="环境准备">环境准备</h3>
+<blockquote>
+<p>三台机器关闭防火墙，selinux以便测试</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>主机名</th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>dns-master</td>
+<td>192.168.88.5</td>
+<td>DNS主服务器</td>
+</tr>
+<tr>
+<td>dns-slave</td>
+<td>192.168.88.6</td>
+<td>DNS从服务器</td>
+</tr>
+<tr>
+<td>pc</td>
+<td>192.168.88.7</td>
+<td>客户机</td>
+</tr>
+</tbody>
+</table>
+<h3 id="搭建主服务器">搭建主服务器</h3>
+<figure class="highlight shell"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">软件安装及配置</span><br>[root@dns-master ~]# dnf -y install bind bind-chroot bind-utils<br>[root@dns-master ~]#vim /etc/named.conf<br>options {<br>        directory "/var/named";  # 指定地址库文件所在地<br>        allow-transfer { 192.168.88.6; }; # 指定从服务器的IP地址<br>        <br>};      <br><br>zone "coke.cn" IN { # 指定根域名<br>        type master;<br>        file "coke.cn.zone";<br>}; <br><span class="hljs-meta prompt_"># </span><span class="language-bash">修改地址库文件</span><br>[root@dns-master ~]# cp -p /var/named/{named.localhost,coke.cn.zone} <br>[root@dns-master ~]# vim /var/named/named.cn.zone <br><span class="hljs-meta prompt_">$</span><span class="language-bash">TTL 1D</span><br>@       IN SOA  @ rname.invalid. (<br>                                        0       ; serial<br>                                        1D      ; refresh<br>                                        1H      ; retry<br>                                        1W      ; expire<br>                                        3H )    ; minimum<br>        NS      server<br>        NS		server2<br>server  A       192.168.88.5  # 指定主域名服务器<br>server2 A		192.168.88.6 # 指定从域名服务器<br>www     A       192.168.4.100 # 指定www的解析结果<br>[root@dns-master ~]#systemctl restart named<br><span class="hljs-meta prompt_"># </span><span class="language-bash">指定域名服务器</span><br>[root@dns-master ~]#echo nameserver 192.168.88.5 &gt; /etc/resolv.conf <br><span class="hljs-meta prompt_"># </span><span class="language-bash">测试</span><br>[root@dns-master ~]#nslookup www.coke.cn<br>Server:         192.168.88.5<br>Address:        192.168.88.5#53<br><br>Name:   www.coke.cn<br>Address: 192.168.1.100<br></code></pre></td></tr></tbody></table></figure>
+<h3 id="搭建从服务器">搭建从服务器</h3>
+<figure class="highlight shell"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">装包配置</span><br>[root@dns-slave ~]# dnf -y install bind bind-chroot<br>[root@dns-slave ~]#vim /etc/named.conf<br>options {<br>        directory       "/var/named";<br>};<br><br>zone "coke.cn" IN { # 指定权威域名<br>        type slave; # 指定当前服务器为从服务器<br>        file "coke.cn.slave"; # 指定从主服务器下载下来的地址库文件名称<br>        masters { 192.168.88.5; }; # 指定主服务器<br>        masterfile-format text; # 指定从主服务器同步下来的内容为文本内容；默认为加密内容<br>};<br><span class="hljs-meta prompt_"># </span><span class="language-bash">验证</span><br>[root@dns-slave ~]# systemctl enable named --now<br>[root@dns-slave ~]# ls /var/named/coke.cn.slave <br>/var/named/coke.cn.slave<br>[root@dns-slave ~]# cat /var/named/coke.cn.slave<br><span class="hljs-meta prompt_">$</span><span class="language-bash">ORIGIN .</span><br><span class="hljs-meta prompt_">$</span><span class="language-bash">TTL 86400      ; 1 day</span><br>coke.cn                 IN SOA  coke.cn. rname.invalid. (<br>                                0          ; serial<br>                                86400      ; refresh (1 day)<br>                                3600       ; retry (1 hour)<br>                                604800     ; expire (1 week)<br>                                10800      ; minimum (3 hours)<br>                                )<br>                        NS      server.coke.cn.<br><span class="hljs-meta prompt_">$</span><span class="language-bash">ORIGIN coke.cn.</span><br>server                  A       192.168.88.5<br>www                     A       192.168.1.100<br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">未加上同步内容为文本</span><br>[root@dns-slave ~]#cat /var/named/coke.cn.slave <br>e�m;KQ� cokecn,cokecnrnameinvalidQ�     :�*0/Q� cokecnservercokecn*Q�serverc<br></code></pre></td></tr></tbody></table></figure>
+<h3 id="客户机测试">客户机测试</h3>
+<blockquote>
+<p>手动指定域名服务器</p>
+<p>nslookup 域名 域名服务器地址</p>
+</blockquote>
+<figure class="highlight shell"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs shell">[root@pc ~]#dnf -y install bind-utils<br>[root@pc ~]# nslookup www.coke.cn 192.168.88.5<br>Server:         192.168.88.5<br>Address:        192.168.88.5#53<br><br>Name:   www.coke.cn<br>Address: 192.168.1.100<br><br>[root@pc ~]# nslookup www.coke.cn 192.168.88.6<br>Server:         192.168.88.6<br>Address:        192.168.88.6#53<br><br>Name:   www.coke.cn<br>Address: 192.168.1.100<br></code></pre></td></tr></tbody></table></figure>
+<h3 id="主从同步">主从同步</h3>
+<blockquote>
+<p>以上配置完后，主修改内容从还不能进行同步</p>
+</blockquote>
+<figure class="highlight shell"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">修改主地址库文件</span><br>[root@dns-master ~]# vim /var/named/coke.cn.zone <br><span class="hljs-meta prompt_">$</span><span class="language-bash">TTL 1D</span><br>@       IN SOA  @ rname.invalid. (<br>                                   202402240    ; serial # 数据版本号，主从在同步时通过版本号去同步要不要同步数据的更新；通过数据版本号来进行更新，当主的版本号大于从的从就进行更新；数据版本号是以10个数字来组成，一般建议时间年月加第几次修改：2024022401;若需要修改匹配的规则就需要修改一下版本号<br>                                        1D      ; refresh<br>                                        1H      ; retry<br>                                        1W      ; expire<br>                                        3H )    ; minimum<br>        NS      server<br>server  A       192.168.88.5<br>www     A       192.168.2.100<br>[root@dns-master ~]#systemct restart named<br><span class="hljs-meta prompt_"># </span><span class="language-bash">将从的地址库文件删除并重启</span><br>[root@dns-slave ~]#rm -rf /var/named/coke.cn.slave<br>[root@dns-slave ~]#systemctl restart named<br></code></pre></td></tr></tbody></table></figure>
+<blockquote>
+<p>[注]：每次修改的版本号必须大于上一次设置的版本号</p>
+</blockquote>
+<h3 id="主从测试">主从测试</h3>
+<figure class="highlight shell"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">未修改版本号测试</span><br>[root@pc ~]# nslookup www.coke.cn 192.168.88.5<br>Server:         192.168.88.5<br>Address:        192.168.88.5#53<br><br>Name:   www.coke.cn<br>Address: 192.168.2.100<br><br>[root@pc ~]# nslookup www.coke.cn 192.168.88.6<br>Server:         192.168.88.6<br>Address:        192.168.88.6#53<br><br>Name:   www.coke.cn<br>Address: 192.168.1.100<br><span class="hljs-meta prompt_"></span><br><span class="hljs-meta prompt_"># </span><span class="language-bash">修改版本号测试</span><br>[root@pc2 ~]# nslookup www.coke.cn 192.168.88.6<br>Server:         192.168.88.6<br>Address:        192.168.88.6#53<br><br>Name:   www.coke.cn<br>Address: 192.168.2.100<br></code></pre></td></tr></tbody></table></figure>
+<h3 id="调优建议">调优建议</h3>
+<blockquote>
+<p>通过上述测试存在的问题：</p>
+<p>从同步主的数据时限过长，久久不能进行同步</p>
+<p>解决办法：</p>
+<ul>
+<li>删除从同步的文件，重启服务</li>
+<li>调整刷新时间</li>
+</ul>
+</blockquote>
+<figure class="highlight shell"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">将从中的刷新时间调短</span><br>[root@dns-slave ~]#vim /var/named/coke.cn.slave <br><span class="hljs-meta prompt_">$</span><span class="language-bash">ORIGIN .</span><br><span class="hljs-meta prompt_">$</span><span class="language-bash">TTL 86400      ; 1 day</span><br>coke.cn                 IN SOA  coke.cn. rname.invalid. (<br>                                2024022403 ; serial<br>                                30      ; refresh (1 day) #单位为秒<br>                                3600       ; retry (1 hour)<br>                                604800     ; expire (1 week)<br>                                10800      ; minimum (3 hours)<br>                                )<br>                        NS      server.coke.cn.<br><span class="hljs-meta prompt_">$</span><span class="language-bash">ORIGIN coke.cn.</span><br>server                  A       192.168.88.5<br>www                     A       192.168.6.100<br></code></pre></td></tr></tbody></table></figure>
+<blockquote>
+<p>SOA参数序列解释：</p>
+<ul>
+<li><code>2024022403</code>：序列号（serial number）。每次对区域数据进行更改并成功同步到从属服务器后，这个数字都应该递增。格式通常是YYYYMMDDnn，其中nn是一个版本序号，这样其他DNS服务器可以通过比较自己的序列号与主服务器的序列号来判断是否需要获取新的区域数据。</li>
+<li><code>1D</code>：刷新（refresh）。这是从服务器检查主服务器上是否有区域数据更新的时间间隔，单位为秒。在这个案例中，从服务器每过一天就会向主服务器请求一次区域数据。</li>
+<li><code>1H</code>：重试（retry）。如果从服务器尝试刷新失败，它将在一小时后再次尝试联系主服务器。</li>
+<li><code>1W</code>：过期（expire）。若从服务器连续多次（根据retry设置决定）无法从主服务器获取更新，则认为主服务器失效，从服务器将不再响应对此区域的查询，直到达到这个过期时间（一周）。</li>
+<li><code>3H</code>：最小TTL（minimum）。这是针对该区域所有资源记录的最低有效TTL值。即使某个资源记录的TTL更低，任何DNS服务器也必须至少保留这个值所指定的时间长度的数据。在此例中，即使某个资源记录的TTL小于3小时，解析器也至少需要缓存3小时。</li>
+</ul>
+</blockquote>
+<h3 id="注意">注意</h3>
+<blockquote>
+<p><strong>调短刷新时间存在的潜在缺点：</strong></p>
+<ul>
+<li>增加网络流量：频繁的刷新会导致主从服务器之间的通信更频繁，特别是在大型部署中，可能会增加不必要的网络带宽使用。</li>
+<li>增加主服务器负载：主服务器需要处理更多的区域传输请求，这可能在高并发场景下对主服务器造成额外的压力。</li>
+<li>对于很少更改的区域来说效率不高：如果DNS区域数据非常稳定，不经常变动，则过于频繁的刷新会显得资源利用率较低。</li>
+</ul>
+<p><code>refresh</code>时间间隔设置应当基于业务需求和服务器性能来综合考虑，以平衡实时性与资源消耗。对于要求较高数据一致性的场景，较短的刷新时间是有益的；而对于数据相对静态且对实时性要求不高的环境，保持默认或较长的时间间隔更为合适。</p>
+<p>一般而言，30分钟至几个小时的刷新间隔是常见的配置选择。</p>
+</blockquote>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/dns/" class="category-chain-item">dns</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>2-DNS主从搭建</div>
+      <div>http://example.com/2024/04/06/2-DNS主从搭建/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>gogetacoke</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年4月6日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2024/04/06/3-DNS%E5%88%86%E7%A6%BB%E8%A7%A3%E6%9E%90/" title="2-DNS分离解析">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">2-DNS分离解析</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/04/06/1-DNS%E5%9F%BA%E6%9C%AC%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8/" title="1-DNS基本安装使用">
+                        <span class="hidden-mobile">1-DNS基本安装使用</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
